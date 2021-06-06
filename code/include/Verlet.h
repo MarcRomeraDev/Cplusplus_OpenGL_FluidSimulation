@@ -6,8 +6,8 @@ class Verlet : public Solver
 {
 public:
 	Verlet();
-	Verlet(glm::vec3, float, float, float, bool);
+	Verlet(glm::vec3, float, bool);
 
 	void Update(Mesh&, float);
-	void ReboundPlane(glm::vec3&, glm::vec3&, glm::vec3&, glm::vec3, float, float);
+
 };

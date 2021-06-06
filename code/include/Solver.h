@@ -6,28 +6,20 @@ class Solver
 private:
 	struct SphereCollider
 	{
-		glm::vec3 c = { 0.f, 4.f, 0.f };
+		glm::vec3 c = { 0.f, 7.f, 0.f };
 		float r = 1.f;
-	};
-
-	struct CapsuleCollider
-	{
-		glm::vec3 pos[2] = { glm::vec3(-3.f, 2.f, 0.f), glm::vec3(-3.f, 2.f, 2.f) };
-		float r = 1.f;
+		float mass = 1.f;
 	};
 
 public:
 	Solver();
-	Solver(glm::vec3, float, float, float, bool);
+	Solver(glm::vec3, float, bool);
 
 	virtual void Update(Mesh&, float) = 0;
 
 	glm::vec3 gravity;
-	float reboundCoefficient;
-	float frictionCoefficient;
 	bool useSphereCollision;
 	SphereCollider sphere;
-	CapsuleCollider capsule;
 
 protected:
 	glm::vec3 iPos;

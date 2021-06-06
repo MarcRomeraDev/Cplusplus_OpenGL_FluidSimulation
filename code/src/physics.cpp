@@ -5,7 +5,6 @@
 #include <sstream>
 #include <random>
 
-#include "Euler.h"
 #include "Mesh.h"
 #include "Verlet.h"
 
@@ -18,7 +17,7 @@ namespace LilSpheres {
 	extern void updateParticles(int startIdx, int count, float* array_data);
 }
 namespace Sphere {
-	extern void updateSphere(glm::vec3 pos, float radius);
+	extern void updateSphere(glm::vec3 pos, float radius, float mass);
 }
 namespace Capsule {
 	extern void updateCapsule(glm::vec3 posA, glm::vec3 posB, float radius);
@@ -38,41 +37,37 @@ extern bool renderCloth;
 #pragma endregion
 
 #pragma region Variables globals
+Wave wave(0.5, 5, 0.2, glm::vec3(1, 0, 1));
 std::random_device rd;
 std::mt19937 gen(rd());
 Solver* solver;
 Mesh mesh;
 std::string t;
 float timer = 0;
-float resetTimer = 20;
+float resetTimer = 15;
 bool autoReset = false;
-bool usingVerlet = true;
 bool playSimulation = false;
 bool useSphereCollision = false;
 bool enableParticles = false;
 glm::vec3 sphereC;
-float r;
-float rebound;
-float friction;
+float r = 1;
+float mass = 2;
+std::string s;
 #pragma endregion
 
 //Funció que reinicialitza i per tant reseteja tots els elements desitjats de la simulació
 void ResetSimulation()
 {
 	timer = 0;
-	std::uniform_real_distribution<double> radius(1, 2);
-	r = radius(gen);
+	mesh.waves.clear();
 	std::uniform_real_distribution<double> centerX(-5 + r, 5 - r);
-	std::uniform_real_distribution<double> centerY(r, 9.5 - r);
+	std::uniform_real_distribution<double> centerY(3.5 + r, 9.5 - r);
 	std::uniform_real_distribution<double> centerZ(-5 + r, 5 - r);
 	sphereC = glm::vec3(centerX(gen), centerY(gen), centerZ(gen));
-	rebound = solver->reboundCoefficient;
-	friction = solver->frictionCoefficient;
 	useSphereCollision = solver->useSphereCollision;
 	mesh.InitMesh();
 	delete solver;
-	if (usingVerlet) solver = new Verlet(sphereC, r, rebound, friction, useSphereCollision);
-	else solver = new Euler(sphereC, r, rebound, friction, useSphereCollision);
+	solver = new Verlet(sphereC, r, useSphereCollision);
 }
 
 //Paràmetres modificables des de l'interfaç
@@ -85,53 +80,63 @@ void GUI() {
 		ImGui::Checkbox("Play simulation", &playSimulation);
 		ImGui::Checkbox("Enable particles", &renderParticles);
 
-		if (ImGui::RadioButton("Euler", (int*)&usingVerlet, 0)) ResetSimulation();
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Verlet", (int*)&usingVerlet, 1)) ResetSimulation();
+		if (ImGui::CollapsingHeader("Mesh Parameters"))
+		{
+			ImGui::Indent();
+			ImGui::NewLine();
+			s = "Create Wave";
+			if (ImGui::Button(s.c_str())) mesh.waves.push_back(wave); 
+			ImGui::NewLine();
+			//Informació modificable de cada objecte
+			for (int i = 0; i < mesh.waves.size(); i++)
+			{
+				ImGui::PushID(i);
+				s = "Wave " + std::to_string(i + 1) + " frequency:";
+				ImGui::DragFloat(s.c_str(), &mesh.waves[i].frequency, 0.005f, 0.f, 10.f);
 
-		ImGui::DragFloat("Stretch rest length", (float*)&mesh.LStretch, 0.005f, 0.1, 1.f);
+				s = "Wave " + std::to_string(i + 1) + " amplitude:";
+				ImGui::DragFloat(s.c_str(), &mesh.waves[i].amplitude, 0.005f, 0.f, 1.f);
+
+				s = "Wave " + std::to_string(i + 1) + " length:";
+				ImGui::DragFloat(s.c_str(), &mesh.waves[i].lambda, 0.005f, 0.f, 2.f);
+
+				s = "Wave " + std::to_string(i + 1) + " direction:";
+				ImGui::DragFloat3(s.c_str(), (float*)&mesh.waves[i].direction, 0.005f, -1, 1);
+
+				s = "Delete Wave " + std::to_string(i + 1);
+				if (ImGui::Button(s.c_str())) mesh.waves.erase(mesh.waves.begin() + i);
+				ImGui::NewLine();
+				
+				ImGui::PopID();
+			}
+
+			ImGui::Unindent();
+		}
 
 		if (ImGui::CollapsingHeader("Solver parameters"))
 		{
+			ImGui::Indent();
+
 			ImGui::DragFloat3("Gravity", (float*)&solver->gravity, 0.05f, -9.81f, 9.81f);
+
+			ImGui::Unindent();
 		}
 
 		if (ImGui::CollapsingHeader("Collision"))
 		{
-			ImGui::Checkbox("Use Collision", &mesh.useCollision);
-			if (mesh.useCollision)
+			ImGui::Indent();
+
+			ImGui::Checkbox("Use sphere collider", &renderSphere);
+
+			if (renderSphere)
 			{
-				ImGui::DragFloat("Elasticidad", &solver->reboundCoefficient, 0.005f, 0.f, 1.f);
-				ImGui::DragFloat("Friccion", &solver->frictionCoefficient, 0.005f, 0.f, 1.f);
-
-				ImGui::Checkbox("Use sphere collider", &renderSphere);
-
-				if (renderSphere)
-				{
-					solver->useSphereCollision = true;
-					ImGui::DragFloat3("Shpere Pos", (float*)&solver->sphere.c, 0.05f, -9.8f, 9.8f);
-					ImGui::DragFloat("Sphere Radius", &solver->sphere.r, 0.005f, 0.3f, 5.f);
-				}
-				else
-					solver->useSphereCollision = false;
+				solver->useSphereCollision = true;
+				ImGui::DragFloat3("Shpere Pos", (float*)&solver->sphere.c, 0.05f, -9.8f, 9.8f);
+				ImGui::DragFloat("Sphere Radius", &solver->sphere.r, 0.005f, 0.3f, 5.f);
 			}
-		}
+			else solver->useSphereCollision = false;
 
-		if (ImGui::CollapsingHeader("Spring parameters"))
-		{
-			if (ImGui::CollapsingHeader("Spring's constants"))
-			{
-				ImGui::DragFloat("K stretch", (float*)&mesh.kEStretch, 5.f, 1, 2000.f);
-				ImGui::DragFloat("K shear", (float*)&mesh.kEShear, 5.f, 1, 2000.f);
-				ImGui::DragFloat("K bending", (float*)&mesh.kEBend, 5.f, 1, 2000.f);
-			}
-
-			if (ImGui::CollapsingHeader("Spring's dampings"))
-			{
-				ImGui::DragFloat("Stretch damping", (float*)&mesh.stretchDamping, 0.5f, 0.f, 100.f);
-				ImGui::DragFloat("Shear damping", (float*)&mesh.shearDamping, 0.5f, 0.f, 100.f);
-				ImGui::DragFloat("Bend damping", (float*)&mesh.bendDamping, 0.5f, 0.f, 100.f);
-			}
+			ImGui::Unindent();
 		}
 
 		t = "Autoreset simulation: " + std::to_string(resetTimer) + "s";
@@ -144,37 +149,37 @@ void GUI() {
 	ImGui::End();
 }
 
-//Inicialitza la simulació
+// Inicialitza la simulació
 void PhysicsInit()
 {
 	renderParticles = false;
 	renderCloth = true;
 	renderSphere = true;
-	mesh = Mesh(ClothMesh::numCols, ClothMesh::numRows, glm::vec3(-2.8, 9.5, 4), 0.5, true);
+	mesh = Mesh(ClothMesh::numCols, ClothMesh::numRows, glm::vec3(-5, 3, 5), 0.770, 0.590, false);
 	solver = new Verlet();
 	solver->useSphereCollision = renderSphere;
 	LilSpheres::particleCount = mesh.width * mesh.height;
 }
 
-//Update de les posicions amb el solver que s'estigui usant, de la mesh i de les partícules/esfera/malla
+// Update de les posicions amb el solver que s'estigui usant, de la mesh i de les partícules/esfera/malla
 void PhysicsUpdate(float dt)
 {
 	if (playSimulation)
 	{
 		timer += dt;
-		for (int i = 0; i < 10; i++)
-		{
-			mesh.GetSpringForces(solver->gravity);
-			solver->Update(mesh, dt / 10);
-		}
 
 		if (autoReset && timer >= resetTimer) ResetSimulation();
 	}
+	for(int i =0; i < mesh.waves.size();i++)
+	{
+		mesh.waves[i].CalculateWaveNumber();
+	}
+	mesh.GerstnerWaves(timer);
 	ClothMesh::updateClothMesh(&mesh.positions[0].x);
-	Sphere::updateSphere(solver->sphere.c, solver->sphere.r);
+	Sphere::updateSphere(solver->sphere.c, solver->sphere.r, solver->sphere.mass);
 	LilSpheres::updateParticles(0, mesh.width * mesh.height, &mesh.positions[0].x);
 }
 
-void PhysicsCleanup() { 
+void PhysicsCleanup() {
 	delete solver; //-->Cleanup del solver
 }

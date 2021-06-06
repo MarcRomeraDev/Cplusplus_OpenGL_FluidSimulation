@@ -138,7 +138,6 @@ xcopy $(ProjectDir)libs\SDL2.dll $(OutDir) /y /d</Command>
     <ClCompile Include="include\imgui\imgui_demo.cpp" />
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_sdl_gl3.cpp" />
-    <ClCompile Include="src\Euler.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\ParticleSystem.cpp" />
@@ -149,7 +148,6 @@ xcopy $(ProjectDir)libs\SDL2.dll $(OutDir) /y /d</Command>
     <ClCompile Include="src\Verlet.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Euler.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\ParticleSystem.h" />
     <ClInclude Include="include\Solver.h" />

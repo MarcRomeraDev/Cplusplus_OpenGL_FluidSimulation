@@ -28,9 +28,9 @@ extern void cleanupPrims();
 ////////////////
 
 namespace RenderVars {
-	const float FOV = glm::radians(65.f);
-	const float zNear = 1.f;
-	const float zFar = 50.f;
+	const float FOV = glm::radians(90.f);
+	const float zNear = 0.01f;
+	const float zFar = 500.f;
 
 	glm::mat4 _projection;
 	glm::mat4 _modelView;
@@ -365,6 +365,7 @@ namespace Sphere {
 	GLuint sphereShaders[3];
 	GLuint sphereProgram;
 	float radius;
+	float mass;
 
 	const char* sphere_vertShader =
 		"#version 330\n\
@@ -468,7 +469,7 @@ void main() {\n\
 
 		cleanupSphereShaderAndProgram();
 	}
-	void updateSphere(glm::vec3 pos, float radius) {
+	void updateSphere(glm::vec3 pos, float radius, float mass) {
 		glBindBuffer(GL_ARRAY_BUFFER, sphereVbo);
 		float* buff = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 		buff[0] = pos.x;
@@ -477,6 +478,7 @@ void main() {\n\
 		glUnmapBuffer(GL_ARRAY_BUFFER);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		Sphere::radius = radius;
+		Sphere::mass = mass;
 	}
 	void drawSphere() {
 		glBindVertexArray(sphereVao);

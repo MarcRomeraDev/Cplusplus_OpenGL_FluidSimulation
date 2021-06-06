@@ -1,8 +1,7 @@
 #include "Solver.h"
 
-Solver::Solver() : gravity(0, -9.81, 0), reboundCoefficient(1), frictionCoefficient(1), useSphereCollision(0) {}
-Solver::Solver(glm::vec3 spherePos, float sphereRadius, float rebound, float friction, bool _useSphereCollision) : gravity(0, -9.81, 0), reboundCoefficient(rebound), frictionCoefficient(friction),
-useSphereCollision(_useSphereCollision)
+Solver::Solver() : gravity(0, -9.81, 0), useSphereCollision(0) {}
+Solver::Solver(glm::vec3 spherePos, float sphereRadius, bool _useSphereCollision) : gravity(0, -9.81, 0), useSphereCollision(_useSphereCollision)
 {
 	sphere.c = spherePos;
 	sphere.r = sphereRadius;
@@ -69,19 +68,19 @@ glm::vec3 Solver::GetCollisionPoint(glm::vec3 iPos, glm::vec3 pos, glm::vec3 sph
 }
 
 //Calcul del rebot en el plà amb Euler
-void Solver::ReboundPlane(glm::vec3& p, glm::vec3& v, glm::vec3 n, float d)
-{
-	p -= (1 + reboundCoefficient) * (glm::dot(n, p) + d) * n;
-	v -= (1 + reboundCoefficient) * (glm::dot(n, v)) * n;
-
-	//Això és un offset per si hi hagués algún cas límit on alguna partícula atravessa la col·lisió de les parets i es quedessin enganxades
-	if (glm::dot(n, p) + d == 0.f) p += n * 0.001f;
-
-	glm::vec3 vN = glm::dot(n, v) * n;
-	glm::vec3 vT = v - vN;
-
-	v = v - frictionCoefficient * vT;
-}
+//void Solver::ReboundPlane(glm::vec3& p, glm::vec3& v, glm::vec3 n, float d)
+//{
+//	p -= (1 + reboundCoefficient) * (glm::dot(n, p) + d) * n;
+//	v -= (1 + reboundCoefficient) * (glm::dot(n, v)) * n;
+//
+//	//Això és un offset per si hi hagués algún cas límit on alguna partícula atravessa la col·lisió de les parets i es quedessin enganxades
+//	if (glm::dot(n, p) + d == 0.f) p += n * 0.001f;
+//
+//	glm::vec3 vN = glm::dot(n, v) * n;
+//	glm::vec3 vT = v - vN;
+//
+//	v = v - frictionCoefficient * vT;
+//}
 
 //Calcula la col·lisió amb una esfera i retorna si s'ha colisionat o no
 bool Solver::CheckCollisionSphere(glm::vec3 pos, glm::vec3 sphereCenter, float radius) 
