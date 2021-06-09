@@ -37,7 +37,7 @@ extern bool renderCloth;
 #pragma endregion
 
 #pragma region Variables globals
-Wave wave(0.5, 5, 0.2, glm::vec3(1, 0, 1));
+Wave wave(0.3, 5, 0.1, glm::vec3(1, 0, 1));
 std::random_device rd;
 std::mt19937 gen(rd());
 Solver* solver;
@@ -45,13 +45,13 @@ Mesh mesh;
 std::string t;
 float timer = 0;
 float resetTimer = 15;
-bool autoReset = false;
+bool autoReset = true;
 bool playSimulation = false;
 bool useSphereCollision = false;
 bool enableParticles = false;
 glm::vec3 sphereC;
 float r = 1;
-float mass = 2;
+float mass = 1.f;
 std::string s;
 #pragma endregion
 
@@ -60,14 +60,16 @@ void ResetSimulation()
 {
 	timer = 0;
 	mesh.waves.clear();
-	std::uniform_real_distribution<double> centerX(-5 + r, 5 - r);
-	std::uniform_real_distribution<double> centerY(3.5 + r, 9.5 - r);
-	std::uniform_real_distribution<double> centerZ(-5 + r, 5 - r);
+	std::uniform_real_distribution<double> centerX(-5.f + r, 5.f - r);
+	std::uniform_real_distribution<double> centerY(5.f + r, 9.5f - r);
+	std::uniform_real_distribution<double> centerZ(-5.f + r, 5.f - r);
 	sphereC = glm::vec3(centerX(gen), centerY(gen), centerZ(gen));
 	useSphereCollision = solver->useSphereCollision;
+	
 	mesh.InitMesh();
 	delete solver;
-	solver = new Verlet(sphereC, r, useSphereCollision);
+	mass = (rand() % 5) + 1;
+	solver = new Verlet(sphereC, r, mass, useSphereCollision);
 }
 
 //Paràmetres modificables des de l'interfaç
@@ -92,13 +94,13 @@ void GUI() {
 			{
 				ImGui::PushID(i);
 				s = "Wave " + std::to_string(i + 1) + " frequency:";
-				ImGui::DragFloat(s.c_str(), &mesh.waves[i].frequency, 0.005f, 0.f, 10.f);
+				ImGui::DragFloat(s.c_str(), &mesh.waves[i].frequency, 0.005f, 0.f, 15.f);
 
 				s = "Wave " + std::to_string(i + 1) + " amplitude:";
 				ImGui::DragFloat(s.c_str(), &mesh.waves[i].amplitude, 0.005f, 0.f, 1.f);
 
 				s = "Wave " + std::to_string(i + 1) + " length:";
-				ImGui::DragFloat(s.c_str(), &mesh.waves[i].lambda, 0.005f, 0.f, 2.f);
+				ImGui::DragFloat(s.c_str(), &mesh.waves[i].lambda, 0.005f, 0.f, 0.5f);
 
 				s = "Wave " + std::to_string(i + 1) + " direction:";
 				ImGui::DragFloat3(s.c_str(), (float*)&mesh.waves[i].direction, 0.005f, -1, 1);
@@ -131,8 +133,8 @@ void GUI() {
 			if (renderSphere)
 			{
 				solver->useSphereCollision = true;
-				ImGui::DragFloat3("Shpere Pos", (float*)&solver->sphere.c, 0.05f, -9.8f, 9.8f);
-				ImGui::DragFloat("Sphere Radius", &solver->sphere.r, 0.005f, 0.3f, 5.f);
+				ImGui::DragFloat3("Shpere Pos", (float*)&solver->sphere.c, 0.05f, -5.f, 5.f);
+				ImGui::DragFloat("Sphere Mass", &solver->sphere.mass, 0.005f, 1.f, 5.f);
 			}
 			else solver->useSphereCollision = false;
 
@@ -164,24 +166,22 @@ void PhysicsInit()
 // Update de les posicions amb el solver que s'estigui usant, de la mesh i de les partícules/esfera/malla
 void PhysicsUpdate(float dt)
 {
+	mesh.initialContactPos = glm::vec3(solver->sphere.c.x, mesh.initPos.y, solver->sphere.c.z);
 	if (playSimulation)
 	{
 		timer += dt;
 
 		if (autoReset && timer >= resetTimer) ResetSimulation();
 
-
-
 		solver->Update(mesh, dt, timer);
 	}
+
 	// Calculem la variable Wave Number en cada frame per cada ona, d'aquesta forma es possible cambiar valors de les ones en el ImGui en tot moment
 	for(int i =0; i < mesh.waves.size();i++) 
 	{
 		mesh.waves[i].CalculateWaveNumber();
 	}
 	mesh.GerstnerWaves(timer);
-
-
 
 	ClothMesh::updateClothMesh(&mesh.positions[0].x);
 	Sphere::updateSphere(solver->sphere.c, solver->sphere.r, solver->sphere.mass);

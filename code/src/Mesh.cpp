@@ -11,12 +11,12 @@ Mesh::Mesh(int _width, int _height, glm::vec3 _initPos, float _LStretchX, float 
 
 void Mesh::InitMesh()
 {
-	Wave wave1(0.5, 5, 0.2, glm::vec3(1, 0, 1)); // We set the wave info
-	Wave wave2(0.5, 5, 0.2, glm::vec3(1, 0, -1)); // We set the wave info
+	Wave wave1(0.5, 5, 0.5, glm::vec3(1, 0, 1)); // We set the wave info
+	Wave wave2(0.5, 5, 0.5, glm::vec3(1, 0, -1)); // We set the wave info
 
 	waves.push_back(wave1);
 	waves.push_back(wave2);
-	
+
 	initPos.x = -5;
 	for (int row = 0; row < height; row++) // Inicialitzem la Mesh
 	{
@@ -40,7 +40,7 @@ void Mesh::GerstnerWaves(float time) // Calcul de les noves posicions dels vèrte
 	glm::vec3 x; // Nova posicio sobre el pla
 	float y;	 // Altura
 
-	for (int row = 0; row < height; row++) 
+	for (int row = 0; row < height; row++)
 	{
 		for (int col = 0; col < width; col++)
 		{
@@ -49,8 +49,8 @@ void Mesh::GerstnerWaves(float time) // Calcul de les noves posicions dels vèrte
 
 			for (int i = 0; i < waves.size(); i++) // Per cada ona, apliquem el sumatori de forçes
 			{
-				x += (waves[i].direction / waves[i].waveNumber) * waves[i].amplitude 
-					* glm::sin(glm::dot(waves[i].direction, positionsBefore[GetIndex(row, col)]) - waves[i].frequency * time); 
+				x += (waves[i].direction / waves[i].waveNumber) * waves[i].amplitude
+					* glm::sin(glm::dot(waves[i].direction, positionsBefore[GetIndex(row, col)]) - waves[i].frequency * time);
 
 				y += waves[i].amplitude * glm::cos(glm::dot(waves[i].direction, positionsBefore[GetIndex(row, col)]) - waves[i].frequency * time);
 			}
@@ -59,15 +59,15 @@ void Mesh::GerstnerWaves(float time) // Calcul de les noves posicions dels vèrte
 			positions[GetIndex(row, col)] = glm::vec3(x.x, positionsBefore[GetIndex(row, col)].y + y, x.z);
 		}
 	}
-}
-float Mesh::GetHeightInPos(glm::vec3 sphereCenter, float time){
 
+	x = glm::vec3(0);
+	y = 0;
 
-	int y = 0;
 	for (int i = 0; i < waves.size(); i++) // Per cada ona, apliquem el sumatori de forçes
 	{
-	//	y += waves[i].amplitude * glm::cos(glm::dot(waves[i].direction, liquidPos) - waves[i].frequency * time);
+		y += waves[i].amplitude * glm::cos(glm::dot(waves[i].direction, initialContactPos) - waves[i].frequency * time);
 	}
-	y += initPos.y;
-	return y;
+
+	// Li apliquem l'offset de la posició inicial a la funció
+	contactPos.y = initPos.y + y;
 }

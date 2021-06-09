@@ -6,11 +6,11 @@ class Verlet : public Solver
 {
 public:
 	Verlet();
-	Verlet(glm::vec3, float, bool);
+	Verlet(glm::vec3, float,float, bool);
+
+	glm::vec3 Fbuoyancy;
 
 	void Update(Mesh&, float, float);
 
 	float GetVolumUnderLiquid(float planeHeight);
-
-
 };

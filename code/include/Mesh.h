@@ -9,36 +9,33 @@ struct Wave {
 	glm::vec3 direction;
 	float lambda;
 
-
-	void CalculateWaveNumber(){ waveNumber = (2 * 3.14f) / lambda; }
+	void CalculateWaveNumber() { waveNumber = (2 * 3.14f) / lambda; }
 
 	Wave() : amplitude(2), frequency(2), direction(glm::vec3(0, 0, 1)), lambda(2)
 	{
 		CalculateWaveNumber();
 	}
 
-	Wave(float _amplitude, float _frequency, float distanceBtwCrests, glm::vec3 waveDirection) : amplitude(_amplitude), frequency(_frequency), direction(waveDirection), lambda(distanceBtwCrests)
+	Wave(float _amplitude, float _frequency, float waveLength, glm::vec3 waveDirection) : amplitude(_amplitude), frequency(_frequency), direction(waveDirection), lambda(waveLength)
 	{
 		CalculateWaveNumber();
 	}
-
-
 };
 
 class Mesh : public ParticleSystem
 {
-private:	
+private:
 	int GetIndex(int, int);
 	glm::vec3 CalculateForce();
 
 public:
+	glm::vec3 contactPos;
+	glm::vec3 initialContactPos;
 	Mesh();
 	Mesh(int _width, int _height, glm::vec3 _initPos, float _LStretchX, float _LStretchY, bool _useCollision);
 
 	void InitMesh();
 	void GerstnerWaves(float);
-
-	float GetHeightInPos(glm::vec3,float);
 
 	int width, height;
 	float LStretchX, LStretchY;
