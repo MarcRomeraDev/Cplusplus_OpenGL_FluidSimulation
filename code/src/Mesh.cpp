@@ -60,3 +60,14 @@ void Mesh::GerstnerWaves(float time) // Calcul de les noves posicions dels vèrte
 		}
 	}
 }
+float Mesh::GetHeightInPos(glm::vec3 sphereCenter, float time){
+
+
+	int y = 0;
+	for (int i = 0; i < waves.size(); i++) // Per cada ona, apliquem el sumatori de forçes
+	{
+	//	y += waves[i].amplitude * glm::cos(glm::dot(waves[i].direction, liquidPos) - waves[i].frequency * time);
+	}
+	y += initPos.y;
+	return y;
+}

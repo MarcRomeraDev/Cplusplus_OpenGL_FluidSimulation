@@ -169,12 +169,20 @@ void PhysicsUpdate(float dt)
 		timer += dt;
 
 		if (autoReset && timer >= resetTimer) ResetSimulation();
+
+
+
+		solver->Update(mesh, dt, timer);
 	}
-	for(int i =0; i < mesh.waves.size();i++)
+	// Calculem la variable Wave Number en cada frame per cada ona, d'aquesta forma es possible cambiar valors de les ones en el ImGui en tot moment
+	for(int i =0; i < mesh.waves.size();i++) 
 	{
 		mesh.waves[i].CalculateWaveNumber();
 	}
 	mesh.GerstnerWaves(timer);
+
+
+
 	ClothMesh::updateClothMesh(&mesh.positions[0].x);
 	Sphere::updateSphere(solver->sphere.c, solver->sphere.r, solver->sphere.mass);
 	LilSpheres::updateParticles(0, mesh.width * mesh.height, &mesh.positions[0].x);

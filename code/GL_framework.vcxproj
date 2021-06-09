@@ -148,6 +148,7 @@ xcopy $(ProjectDir)libs\SDL2.dll $(OutDir) /y /d</Command>
     <ClCompile Include="src\Verlet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\ParticleSystem.h" />
     <ClInclude Include="include\Solver.h" />

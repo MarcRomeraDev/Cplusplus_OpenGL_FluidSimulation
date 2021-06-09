@@ -9,6 +9,7 @@ struct Wave {
 	glm::vec3 direction;
 	float lambda;
 
+
 	void CalculateWaveNumber(){ waveNumber = (2 * 3.14f) / lambda; }
 
 	Wave() : amplitude(2), frequency(2), direction(glm::vec3(0, 0, 1)), lambda(2)
@@ -26,7 +27,7 @@ struct Wave {
 
 class Mesh : public ParticleSystem
 {
-private:
+private:	
 	int GetIndex(int, int);
 	glm::vec3 CalculateForce();
 
@@ -36,6 +37,8 @@ public:
 
 	void InitMesh();
 	void GerstnerWaves(float);
+
+	float GetHeightInPos(glm::vec3,float);
 
 	int width, height;
 	float LStretchX, LStretchY;

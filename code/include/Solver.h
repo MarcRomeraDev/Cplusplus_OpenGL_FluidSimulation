@@ -15,7 +15,7 @@ public:
 	Solver();
 	Solver(glm::vec3, float, bool);
 
-	virtual void Update(Mesh&, float) = 0;
+	virtual void Update(Mesh&, float, float) = 0;
 
 	glm::vec3 gravity;
 	bool useSphereCollision;
@@ -24,6 +24,8 @@ public:
 protected:
 	glm::vec3 iPos;
 	glm::vec3 iV;
+
+	//Get
 	glm::vec3 GetCollisionNorm(glm::vec3 collisionPos, glm::vec3 sphereC);
 	glm::vec3 GetCollisionPoint(glm::vec3, glm::vec3, glm::vec3, float);
 	void ReboundPlane(glm::vec3&, glm::vec3&, glm::vec3, float);

@@ -8,6 +8,9 @@ public:
 	Verlet();
 	Verlet(glm::vec3, float, bool);
 
-	void Update(Mesh&, float);
+	void Update(Mesh&, float, float);
+
+	float GetVolumUnderLiquid(float planeHeight);
+
 
 };
